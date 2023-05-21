@@ -16,7 +16,6 @@ hide_st_style = """
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
-
 st.title("IPL23 Match Summary")
 st.divider()
 
@@ -24,7 +23,7 @@ df = pd.read_csv('each_ball_records.csv')
 pd.set_option("display.max_rows", None)
 df=df.drop('comment',axis=1)
 
-select_match = st.number_input("Select Match Number", 1)
+select_match = st.number_input("Select Match Number", min_value=1,max_value=37)
 select_inning = st.number_input("Select Inning Number",min_value=1,max_value=2)
 st.divider()
 
@@ -35,8 +34,17 @@ wicket='w'
 tab1, tab2, tab3, tab4 = st.tabs(["Details", "Sixes", "Fours", "Wickets"])
 
 with tab1:
-    st.text("Ball by Ball details for selected Match and Innings")
     output = df.loc[(df['match_no'] == select_match) & (df['inningno'] == select_inning)]
+
+    wickets = len(output[output['outcome'] == wicket])
+    
+    runs = output['outcome'].replace(['0', '1lb', '1', '4', 'w', '6', '1nb', '4lb', '2', '1b', '1wd','2nb','5nb','7nb','3','5wd','4b','2wd','5','3wd','2lb','3nb'], [0,1,1,4,0,6,1,4,2,1,1,2,5,7,3,5,4,2,5,3,2,3])
+    df_runs=pd.DataFrame(runs)
+    total_runs=df_runs['outcome'].sum()
+
+    score = (f"Innings's Score: {total_runs}/{wickets}")
+    score
+   
     st.dataframe(output)
     st.divider()
 
@@ -63,11 +71,3 @@ with tab4:
     w=df_wickets.groupby(['bowler']).count()
     st.bar_chart(w,use_container_width=True)
     st.divider()
-
-#pies=output.groupby(['outcome']).sum()
-#pie_fig = pies.iplot(kind="pie", labels="outcome", values="inningno",
-#                         title="Wine Samples Distribution Per WineType",
-#                         asFigure=True,
-#                        hole=0.4)
-#
-#pie_fig
